@@ -3,7 +3,7 @@ from tkinter import messagebox, simpledialog, Toplevel
 import json
 from datetime import datetime, timedelta
 import re
-
+import pandas as pd
 # Class to represent a classroom
 class Classroom:
     def __init__(self, name, capacity):
@@ -103,6 +103,8 @@ class DragDropInterface(tk.Frame):
         # Buttons for switching views
         self.group_buttons_frame = tk.Frame(self)
         self.group_buttons_frame.pack(side=tk.TOP, padx=10, pady=10)
+        export_button = tk.Button(self, text="Export to Excel", command=self.export_schedule_to_excel)
+        export_button.pack(side=tk.TOP, padx=10, pady=5)
 
         # Create a button for each group
         for group_num in self.manager.predefined_classes.keys():
@@ -161,6 +163,36 @@ class DragDropInterface(tk.Frame):
         self.days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
         self.update_schedule_grid()
+
+
+
+    def export_schedule_to_excel(self):
+        # Export group schedules
+        group_writer = pd.ExcelWriter('group_schedules.xlsx', engine='openpyxl')
+
+        for group_key, group_schedule in self.manager.saved_schedule.items():
+            if 'Group' in group_key:
+                group_df = pd.DataFrame(columns=self.days_of_week, index=self.time_slots)
+                for day, time_slots in group_schedule.items():
+                    for time_slot, class_info in time_slots.items():
+                        group_df.at[time_slot, day] = class_info
+                group_df.to_excel(group_writer, sheet_name=group_key)
+
+        group_writer.close()  # Corrected from save() to close()
+
+        # Export room schedules
+        room_writer = pd.ExcelWriter('room_schedules.xlsx', engine='openpyxl')
+
+        for room in self.manager.classrooms:
+            room_df = pd.DataFrame(columns=self.days_of_week, index=self.time_slots)
+            for day, time_slots in room.schedule.items():
+                for time_slot, class_info in time_slots.items():
+                    room_df.at[time_slot, day] = class_info
+            room_df.to_excel(room_writer, sheet_name=room.name)
+
+        room_writer.close()  # Corrected from save() to close()
+
+        messagebox.showinfo("Export Successful", "Schedules have been exported to Excel.")
 
     def load_backup(self):
         try:
