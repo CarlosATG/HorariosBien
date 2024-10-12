@@ -103,17 +103,17 @@ class DragDropInterface(tk.Frame):
         # Buttons for switching views
         self.group_buttons_frame = tk.Frame(self)
         self.group_buttons_frame.pack(side=tk.TOP, padx=10, pady=10)
-        export_button = tk.Button(self, text="Export to Excel", command=self.export_schedule_to_excel)
-        export_button.pack(side=tk.TOP, padx=10, pady=5)
 
         # Create a button for each group
         for group_num in self.manager.predefined_classes.keys():
             tk.Button(self.group_buttons_frame, text=f"Group {group_num}",
                       command=lambda g=group_num: self.switch_to_group(g)).pack(side=tk.LEFT, padx=5)
+
         # Add a Load Button to load saved schedule manually
         load_button = tk.Button(self, text="Load Schedule", command=self.load_schedule)
         load_button.pack(side=tk.TOP, padx=10, pady=5)
-        # Create a special frame for the backup buttons, placed at the bottom left corner
+
+        # Create a special frame for the backup and export buttons, placed at the bottom left corner
         backup_frame = tk.Frame(self, padx=10, pady=10, relief=tk.RIDGE, borderwidth=2)
         backup_frame.pack(side=tk.LEFT, anchor='sw', padx=10, pady=10)
 
@@ -127,6 +127,10 @@ class DragDropInterface(tk.Frame):
         # Add the Load Backup button to the backup frame
         load_backup_button = tk.Button(backup_frame, text="Load Backup", command=self.load_backup)
         load_backup_button.pack(side=tk.TOP, padx=10, pady=5)
+
+        # Add the Export to Excel button to the backup frame
+        export_button = tk.Button(backup_frame, text="Export to Excel", command=self.export_schedule_to_excel)
+        export_button.pack(side=tk.TOP, padx=10, pady=5)
 
         # Buttons for classrooms
         self.classroom_buttons_frame = tk.Frame(self)
@@ -151,6 +155,9 @@ class DragDropInterface(tk.Frame):
         self.grid_frame.bind("<Configure>",
                              lambda e: self.grid_canvas.configure(scrollregion=self.grid_canvas.bbox("all")))
 
+        # Enable mouse wheel scrolling
+        self.grid_canvas.bind_all("<MouseWheel>", self._on_mousewheel)
+
         # Right side: Class Pool
         self.class_pool_frame = tk.Frame(self, width=200, padx=10, pady=10, relief=tk.RIDGE, borderwidth=2)
         self.class_pool_frame.pack(side=tk.RIGHT, fill=tk.Y)
@@ -164,7 +171,16 @@ class DragDropInterface(tk.Frame):
 
         self.update_schedule_grid()
 
+    def _on_mousewheel(self, event):
+        # For Windows and Linux systems
+        self.grid_canvas.yview_scroll(-1 * int((event.delta / 120)), "units")
 
+        # For macOS (which uses event.delta differently)
+        # If you need macOS support, uncomment the following:
+        # if event.delta < 0:
+        #     self.grid_canvas.yview_scroll(1, "units")
+        # else:
+        #     self.grid_canvas.yview_scroll(-1, "units")
 
     def export_schedule_to_excel(self):
         # Export group schedules
@@ -845,7 +861,7 @@ class DragDropInterface(tk.Frame):
 if __name__ == "__main__":
     root = tk.Tk()
     root.title("Interactive Scheduler")
-
+    root.geometry("1400x800")
     # Initialize the schedule manager
     manager = ScheduleManager()
 
@@ -855,4 +871,5 @@ if __name__ == "__main__":
 
     # Start the Tkinter interface
     app = DragDropInterface(master=root, manager=manager)
+    app.switch_to_group(1)
     app.mainloop()
