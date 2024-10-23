@@ -17,25 +17,25 @@ class ScheduleManager:
         self.classrooms = []
         self.groups = {}  # Track groups by their number
         self.predefined_classes = {
-            1: ["Cálculo Diferencial", "Mecánica Clásica", "Ecología", "Química Universitaria"],
+            1: ["Cálculo Diferencial", "Mecánica Clásica", "Ecología", "Química Universitaria", "Optativa Inter",],
             2: ["Cálculo Integral", "Lab de Mediciones y Mecánica", "Ondas Calor Fluidos", "Probabilidad Estadística",
-                "Álgebra Lineal"],
-            3: ["Cálculo de Varias Variables", "Electricidad Magnetismo", "Laboratorio Física",
+                "Álgebra Lineal", "Optativa Inter"],
+            3: ["Cálculo de Varias Variables", "Optativa Inter","Electricidad Magnetismo", "Laboratorio Física",
                 "Circuitos Eléctricos 1", "Fundamentos de Programación", "Fundamentos Diseño Lógico"],
-            4: ["Ecuaciones Diferenciales", "Campos Electromagnéticos", "Dispositivos Electrónicos",
+            4: ["Ecuaciones Diferenciales", "Optativa Inter","Campos Electromagnéticos", "Dispositivos Electrónicos",
                 "Circuitos Eléctricos 2", "Métodos Numéricos"],
-            5: ["Matemáticas para ICT", "Acondicionamiento de Señales Eléctricas", "Programación Orientada a Objetos",
+            5: ["Matemáticas para ICT", "Optativa Inter","Acondicionamiento de Señales Eléctricas", "Programación Orientada a Objetos",
                 "Diseño Lógico Avanzado"],
-            6: ["Señales Sistemas", "Administración de Organizaciones", "Comunicaciones Analógicas",
+            6: ["Señales Sistemas", "Administración de Organizaciones", "Optativa Inter","Comunicaciones Analógicas",
                 "Algoritmos Estructuras de Datos", "Sistemas Basados en Microcontroladores"],
-            7: ["Control Analógico", "Bases de Datos", "Sistemas Operativos"],
-            8: ["Comunicaciones Digitales", "Óptica Física Moderna", "Fundamentos de Admin de Proyectos de SW",
+            7: ["Control Analógico", "Bases de Datos", "Optativa Inter","Sistemas Operativos"],
+            8: ["Comunicaciones Digitales", "Optativa Inter","Óptica Física Moderna", "Fundamentos de Admin de Proyectos de SW",
                 "Redes de Comunicación"],
-            9: ["Procesamiento Digital de Señales", "Teoría de Información Codificación", "Física Electrónica",
-                "Formulación de proyecto fundamento económico"],
-            10: ["Control Digital", "Laboratorio de Control", "Factibilidad tec económica financiera"],
-            11: ["Emprendimiento social"],
-            12: []  # Group 12 has no classes (thesis work)
+            9: ["Procesamiento Digital de Señales", "Optativa Inter","Teoría de Información Codificación", "Física Electrónica",
+                "Formulación de proyecto fundamento económico", "Optativa Disciplinar"],
+            10: ["Control Digital", "Laboratorio de Control", "Optativa Inter","Factibilidad tec económica financiera", "Optativa Disciplinar"],
+            11: ["Emprendimiento social""Optativa Inter","Optativa Disciplinar"],
+            12: ["Optativa Inter", "Optativa Disciplinar"]  # Group 12 has no classes (thesis work)
         }
         self.current_group = 1
         self.group_tracker = {}  # Track the group number for each class
@@ -106,7 +106,7 @@ class DragDropInterface(tk.Frame):
 
         # Create a button for each group
         for group_num in self.manager.predefined_classes.keys():
-            tk.Button(self.group_buttons_frame, text=f"Group {group_num}",
+            tk.Button(self.group_buttons_frame, text=f"Tri {group_num}",
                       command=lambda g=group_num: self.switch_to_group(g)).pack(side=tk.LEFT, padx=5)
 
         # Add a Load Button to load saved schedule manually
@@ -184,7 +184,7 @@ class DragDropInterface(tk.Frame):
 
     def export_schedule_to_excel(self):
         # Export group schedules
-        group_writer = pd.ExcelWriter('group_schedules.xlsx', engine='openpyxl')
+        group_writer = pd.ExcelWriter('HorarioXTri.xlsx', engine='openpyxl')
 
         for group_key, group_schedule in self.manager.saved_schedule.items():
             if 'Group' in group_key:
@@ -197,7 +197,7 @@ class DragDropInterface(tk.Frame):
         group_writer.close()  # Corrected from save() to close()
 
         # Export room schedules
-        room_writer = pd.ExcelWriter('room_schedules.xlsx', engine='openpyxl')
+        room_writer = pd.ExcelWriter('HorarioXSalon.xlsx', engine='openpyxl')
 
         for room in self.manager.classrooms:
             room_df = pd.DataFrame(columns=self.days_of_week, index=self.time_slots)
@@ -868,6 +868,9 @@ if __name__ == "__main__":
     # Add some example classrooms
     manager.add_classroom("P310", 25)
     manager.add_classroom("B3", 50)
+    manager.add_classroom("B4", 50)
+    manager.add_classroom("P216", 50)
+    manager.add_classroom("P007", 50)
 
     # Start the Tkinter interface
     app = DragDropInterface(master=root, manager=manager)
